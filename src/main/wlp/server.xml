@@ -1,0 +1,15 @@
+<server>
+
+    <featureManager>
+        <feature>servlet-3.1</feature>
+    </featureManager>
+
+    <httpEndpoint id="defaultHttpEndpoint"
+                  host="*"
+                  httpPort="9080">
+        <tcpOptions soReuseAddr="true"/>
+    </httpEndpoint>
+
+    <application name="BluemixObjectStorageLibertySampleApp" context-root="/BluemixObjectStorageLibertySampleApp" location="${appLocation}" type="war"/>
+
+</server>
