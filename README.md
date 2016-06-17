@@ -1,12 +1,12 @@
-# Getting started with IBM Object Storage for Bluemix service using a Java server application
+# Getting started with the IBM Object Storage for Bluemix service using a Java server application
 
-IBM® Object Storage for Bluemix® provides a fully distributed storage platform which you can use to easily store or back up files for your applications. [Read more about it in the documentation here.](https://console.ng.bluemix.net/docs/services/ObjectStorage/index.html) 
+IBM® Object Storage for Bluemix® provides a fully distributed storage platform that you can use to easily store or back up files for your applications. [Read more about it in the documentation here](https://console.ng.bluemix.net/docs/services/ObjectStorage/index.html).
 
-This sample project shows how to create REST endpoints to save and update files in Object Storage, retrieve them, and delete them using an IBM Websphere Liberty application server. In order to do so, the [OpenStack4J Java SDK](http://www.openstack4j.com/learn) will be used. However, there are several others that could also be used, [listed here](https://wiki.openstack.org/wiki/SDKs#Java). 
+This sample project shows how to create REST endpoints to save and update files in Object Storage, retrieve them, and delete them using an IBM Websphere® Application Server Liberty profile. To do so, the [OpenStack4J Java SDK](http://www.openstack4j.com/learn) is used. However, there are several others that could also be used, [listed here](https://wiki.openstack.org/wiki/SDKs#Java). 
 
 
-#Adding the OpenStack4J SDK to the project
-Add the SDK in the Java Project, as explained [here](http://www.openstack4j.com/learn/getting-started). However, since this Java project is using Maven for dependency management, it can be added like this to the pom.xml:
+## Adding the OpenStack4J SDK to the project
+Add the SDK in the Java Project, as explained [here](http://www.openstack4j.com/learn/getting-started). However, because this Java project uses Maven for dependency management, it can be added to the `pom.xml` file as follows:
 
 ```
 <dependency>
@@ -16,7 +16,7 @@ Add the SDK in the Java Project, as explained [here](http://www.openstack4j.com/
 </dependency>
 ```
 
-This sample also uses the Apache IOUtils for some of the methods, which should also be added as a Maven dependency:
+This sample also uses the Apache IOUtils for some methods, which should also be added as a Maven dependency:
 
 ```
 <dependency>
@@ -27,14 +27,16 @@ This sample also uses the Apache IOUtils for some of the methods, which should a
 ```
 
 
-##Before Starting
-This project has the necessary files and configuration to be uploaded to Bluemix as is. In order to do so, first create a [Bluemix application that has a NodeJS runtime](https://console.ng.bluemix.net/docs/runtimes/nodejs/index.html#nodejs_runtime). Once you have that, go the manifest.yml file in the root folder of this sample, and change the `name` and `host` properties to be your Bluemix application's name. Once done, you can upload this sample to your Bluemix application as described in the previous link.
+##Before you begin
+This project has the necessary files and configuration to be uploaded to Bluemix. To do so, first create a [Bluemix application that has a NodeJS runtime](https://console.ng.bluemix.net/docs/runtimes/nodejs/index.html#nodejs_runtime). Then, update the `manifest.yml` file in the root folder of this sample by changing the `name` and `host` properties to your Bluemix application's name. Finally, you can upload this sample to your Bluemix application as described in the previous link.
 
-Also, all of the code discussed in this Readme can be found in src/main/java/wasdev/sample/servlet/SimpleServlet.java.
+All code discussed in this Readme can be found in [`src/main/java/wasdev/sample/servlet/SimpleServlet.java`](src/main/java/wasdev/sample/servlet/SimpleServlet.java).
 
-##Authenticating and Getting Access to Object Storage
+##Authenticating and getting access to Object Storage
 
-Before being able to do anything with ObjectStorage, the server first has to authenticate with the ObjectStorage service to get access to the files. This can be achieved by using OpenStack4J as follows. First, create variables with your service credentials, which can be retrieved from the ObjectStorage dashboard:
+Before you can do anything with Object Storage, the server must authenticate with the Object Storage service to get access to the files. You can use OpenStack4J to achieve this.
+
+1. Create variables with your service credentials, which can be retrieved from the Object Storage dashboard:
 
 ```
 //Get these credentials from Bluemix by going to your Object Storage service, and clicking on Service Credentials:
@@ -46,9 +48,9 @@ private static final String PROJECT_ID = "PUT_YOUR_OBJECT_STORAGE_PROJECT_ID_HER
 
 ```
 
-(If using the sample, these variables should be changed inside SimpleServer.java).
+**Note**: If you use the sample, these variables should be changed inside `SimpleServer.java` file.
 
-Next, do the following to authenticate:
+2. Add the following code to authenticate:
 
 ```
 String OBJECT_STORAGE_AUTH_URL = "https://identity.open.softlayer.com/v3";
@@ -67,7 +69,7 @@ System.out.println("Authenticated successfully!");
 
 ```
 
-Once done, retrieve the ObjectStorageService from the OSClient, which can then be used to work with ObjectStorage itself:
+3. Retrieve the `ObjectStorageService` object from the `OSClient`, which can then be used to work with Object Storage itself:
 
 ```
 ObjectStorageService objectStorage = os.objectStorage();
@@ -75,18 +77,18 @@ ObjectStorageService objectStorage = os.objectStorage();
 
 ##Creating the REST endpoints
 
-With this, create a REST endpoint on a liberty server that can handle the GET, POST and DELETE HTTP verbs, so that the POST endpoint is used to upload new files, the GET endpoint is used to retrieve them, and the DELETE will delete the file.
+You can create a REST endpoint on a liberty server that can handle the GET, POST, and DELETE HTTP verbs. The POST endpoint is used to upload new files. The GET endpoint is used to retrieve the files. The DELETE endpoint is used to delete the files.
 
-In the sample, a single REST endpoint is created called "objectStorage" which will handle all three verbs. Also, it will be assumed that the container name and file name will be passed as [query parameters in the URL](https://en.wikipedia.org/wiki/Query_string), for example, `https://serverUrl/objectStorage?container=containerName&file=fileName`.
+In the sample, a single REST endpoint is created called `/objectStorage`, which handles all three verbs. It is also assumed that the container name and file name are passed as [query parameters in the URL](https://en.wikipedia.org/wiki/Query_string), for example, `https://serverUrl/objectStorage?container=containerName&file=fileName`.
 
 ##Retrieving a file from Object Storage
 
-To retrieve a file, the doGet is written to get the container and file names from the query parameters in the request, and then uses those to retrieve either the file metadata or the file, as follows: 
+To retrieve a file, the `doGet` method is written to get the container and file names from the query parameters in the request, and then uses those names to retrieve either the file metadata or the file, as follows: 
 
 ```
 ObjectStorageService objectStorage = authenticateAndGetObjectStorageService();
 		
-System.out.println("Retrieving file from ObjectStorage...");
+System.out.println("Retrieving file from Object Storage...");
 		
 String containerName = request.getParameter("container");
 		
@@ -129,14 +131,16 @@ else{
 	in.close();
 	out.close();
 		
-	System.out.println("Successfully retrieved file from ObjectStorage!");
+	System.out.println("Successfully retrieved file from Object Storage!");
 }
 ```
 
-This will have returned the file back to the caller if it found it, or a 404 if it was not found. For example, if you go to a browser and open `https://yourServerUrl/objectStorage?container=containerName&file=fileName`, it should retrieve it and display it or download it, depending on the file type.
+The file is returned back to the caller if it was found, or a 404 if it was not found. For example, if you go to a browser and open `https://yourServerUrl/objectStorage?container=containerName&file=fileName`, it should retrieve it and display it, or download it, depending on the file type.
 
 ##Uploading a file to Object Storage
-To add or update a file, the doPost is written to receive the file as part of the POST body, by creating an ObjectStorage Payload object with the InputStream of the request. First, a class is created that implements the Payload interface, and that receives the input stream in the constructor:
+To add or update a file, the `doPost` method is written to receive the file as part of the POST body, by creating an Object Storage Payload object with the InputStream of the request.
+
+1. Create a class that implements the Payload interface, and that receives the input stream in the constructor:
 
 ```
 private class PayloadClass implements Payload<InputStream> {
@@ -174,12 +178,12 @@ private class PayloadClass implements Payload<InputStream> {
 	}
 ```
 
-This class is then used in the doPost to upload the file to Object Storage:
+2. This class is then used in the `doPost` method to upload the file to Object Storage:
 
 ```
 ObjectStorageService objectStorage = authenticateAndGetObjectStorageService();
 
-System.out.println("Storing file in ObjectStorage...");
+System.out.println("Storing file in Object Storage...");
 
 String containerName = request.getParameter("container");
 
@@ -199,10 +203,10 @@ Payload<InputStream> payload = new PayloadClass(fileStream);
 objectStorage.objects().put(containerName, fileName, payload);
 ```
 
-With this endpoint, you can do a POST request to `https://serverUrl/objectStorage?container=containerName&file=fileName` with the file contents as the body, and it will be uploaded to Object Storage. At this point, if you go to your Object Storage instance in Bluemix, you will see the file inside the specified container. Also, note that if the specified container does not exist, it will first create that container, and then upload the file inside it, without having to call any other methods.
+With this endpoint, you can do a POST request to `https://serverUrl/objectStorage?container=containerName&file=fileName` with the file contents as the body, to be uploaded to Object Storage. At this point, if you go to your Object Storage instance in Bluemix, you can see the file inside the specified container. Note that if the specified container does not exist, that container is first created, and then the file is uploaded inside it, without having to call any other methods.
 
 ##Deleting a File
-In order to delete a file, the doDelete endpoint gives the ObjectStorageService the container and file names, and tries to delete it:
+To delete a file, the `doDelete` method gives the `ObjectStorageService` the container and file names, and tries to delete it:
 
 ```
 ActionResponse deleteResponse = objectStorage.objects().delete(containerName,fileName);
@@ -217,8 +221,8 @@ else{
 }
 ```
 
-This will return either a 200 OK indicating that it was successfully deleted, or an error response code from Object Storage.
+This method either returns a 200 OK indicating that the file was successfully deleted, or an error response code from Object Storage.
 
 ##Conclusion
 
-This sample shows the basic functionality of Object Storage by showing how to add, retrieve and delete a file. However, the OpenStack4J Java SDK has much more functionality with regards to managing containers, retrieving file metadata, and more. Learn more here: [http://www.openstack4j.com/learn/objectstorage](http://www.openstack4j.com/learn/objectstorage).
+This sample shows the basic functionality of Object Storage by showing how to add, retrieve, and delete a file. However, the OpenStack4J Java SDK has much more functionality with regards to managing containers, retrieving file metadata, and more. Learn more here: [http://www.openstack4j.com/learn/objectstorage](http://www.openstack4j.com/learn/objectstorage).
