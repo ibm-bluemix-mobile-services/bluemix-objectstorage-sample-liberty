@@ -36,44 +36,42 @@ All code discussed in this Readme can be found in [`src/main/java/wasdev/sample/
 
 Before you can do anything with Object Storage, the server must authenticate with the Object Storage service to get access to the files. You can use OpenStack4J to achieve this.
 
-1. Create variables with your service credentials, which can be retrieved from the Object Storage dashboard:
+   1. Create variables with your service credentials, which can be retrieved from the Object Storage dashboard:
+   ```
+   //Get these credentials from Bluemix by going to your Object Storage service, and clicking on Service Credentials:
 
-```
-//Get these credentials from Bluemix by going to your Object Storage service, and clicking on Service Credentials:
+   private static final String USERNAME = "PUT_YOUR_OBJECT_STORAGE_USERNAME_HERE";
+   private static final String PASSWORD = "PUT_YOUR_OBJECT_STORAGE_PASSWORD_HERE";
+   private static final String DOMAIN_ID = "PUT_YOUR_OBJECT_STORAGE_DOMAIN_ID_HERE";
+   private static final String PROJECT_ID = "PUT_YOUR_OBJECT_STORAGE_PROJECT_ID_HERE";
 
-private static final String USERNAME = "PUT_YOUR_OBJECT_STORAGE_USERNAME_HERE";
-private static final String PASSWORD = "PUT_YOUR_OBJECT_STORAGE_PASSWORD_HERE";
-private static final String DOMAIN_ID = "PUT_YOUR_OBJECT_STORAGE_DOMAIN_ID_HERE";
-private static final String PROJECT_ID = "PUT_YOUR_OBJECT_STORAGE_PROJECT_ID_HERE";
+   ```
+   **Note**: If you use the sample, these variables should be changed inside `SimpleServer.java` file.
 
-```
+   2. Add the following code to authenticate:
 
-**Note**: If you use the sample, these variables should be changed inside `SimpleServer.java` file.
+   ```
+   String OBJECT_STORAGE_AUTH_URL = "https://identity.open.softlayer.com/v3";
 
-2. Add the following code to authenticate:
+   Identifier domainIdentifier = Identifier.byName(DOMAIN_ID);
 
-```
-String OBJECT_STORAGE_AUTH_URL = "https://identity.open.softlayer.com/v3";
-
-Identifier domainIdentifier = Identifier.byName(DOMAIN_ID);
-
-System.out.println("Authenticating...");
+   System.out.println("Authenticating...");
 	
-OSClientV3 os = OSFactory.builderV3()
-	.endpoint(OBJECT_STORAGE_AUTH_URL)
-	.credentials(USERNAME,PASSWORD, domainIdentifier)
-	.scopeToProject(Identifier.byId(PROJECT_ID))
-	.authenticate();
+   OSClientV3 os = OSFactory.builderV3()
+			.endpoint(OBJECT_STORAGE_AUTH_URL)
+			.credentials(USERNAME,PASSWORD, domainIdentifier)
+			.scopeToProject(Identifier.byId(PROJECT_ID))
+			.authenticate();
 
-System.out.println("Authenticated successfully!");
+   System.out.println("Authenticated successfully!");
 
-```
+   ```
 
-3. Retrieve the `ObjectStorageService` object from the `OSClient`, which can then be used to work with Object Storage itself:
+   3. Retrieve the `ObjectStorageService` object from the `OSClient`, which can then be used to work with Object Storage itself:
 
-```
-ObjectStorageService objectStorage = os.objectStorage();
-```
+   ```
+   ObjectStorageService objectStorage = os.objectStorage();
+   ```
 
 ##Creating the REST endpoints
 
@@ -94,7 +92,7 @@ String containerName = request.getParameter("container");
 		
 String fileName = request.getParameter("file");
 		
-if(containerName == null || fileName == null){ 
+if (containerName == null || fileName == null) { 
 	//No file was specified to be found, or container name is missing
 	
 	response.sendError(HttpServletResponse.SC_NOT_FOUND);
@@ -104,14 +102,14 @@ if(containerName == null || fileName == null){
 		
 String metadataOnly = request.getParameter("metadataOnly");
 
-if(metadataOnly != null && metadataOnly.equalsIgnoreCase("true")){
+if (metadataOnly != null && metadataOnly.equalsIgnoreCase("true")) {
 	objectStorage.objects().getMetadata(containerName, fileName);
 }
-else{
+else {
 	
 	SwiftObject fileObj = objectStorage.objects().get(containerName,fileName);
 	
-	if(fileObj == null){ //The specified file was not found
+	if (fileObj == null) { //The specified file was not found
 		response.sendError(HttpServletResponse.SC_NOT_FOUND);
 		System.out.println("File not found.");
 		return;
@@ -140,11 +138,11 @@ The file is returned back to the caller if it was found, or a 404 if it was not 
 ##Uploading a file to Object Storage
 To add or update a file, the `doPost` method is written to receive the file as part of the POST body, by creating an Object Storage Payload object with the InputStream of the request.
 
-1. Create a class that implements the Payload interface, and that receives the input stream in the constructor:
+   1. Create a class that implements the Payload interface, and that receives the input stream in the constructor:
 
-```
-private class PayloadClass implements Payload<InputStream> {
-		private InputStream stream = null;
+   ```
+   private class PayloadClass implements Payload<InputStream> {
+	private InputStream stream = null;
 
 		public PayloadClass(InputStream stream) {
 			this.stream = stream;
@@ -176,32 +174,32 @@ private class PayloadClass implements Payload<InputStream> {
 		}
 
 	}
-```
+   ```
 
-2. This class is then used in the `doPost` method to upload the file to Object Storage:
+   2. This class is then used in the `doPost` method to upload the file to Object Storage:
 
-```
-ObjectStorageService objectStorage = authenticateAndGetObjectStorageService();
+   ```
+   ObjectStorageService objectStorage = authenticateAndGetObjectStorageService();
 
-System.out.println("Storing file in Object Storage...");
+   System.out.println("Storing file in Object Storage...");
 
-String containerName = request.getParameter("container");
+   String containerName = request.getParameter("container");
 
-String fileName = request.getParameter("file");
+   String fileName = request.getParameter("file");
 
-if(containerName == null || fileName == null){ 
-	//No file was specified to be found, or container name is missing
-	response.sendError(HttpServletResponse.SC_NOT_FOUND);
-	System.out.println("File not found.");
-	return;
-}
+   if (containerName == null || fileName == null) { 
+		//No file was specified to be found, or container name is missing
+		response.sendError(HttpServletResponse.SC_NOT_FOUND);
+		System.out.println("File not found.");
+		return;
+   }
 
-final InputStream fileStream = request.getInputStream();
+   final InputStream fileStream = request.getInputStream();
 
-Payload<InputStream> payload = new PayloadClass(fileStream);
+   Payload<InputStream> payload = new PayloadClass(fileStream);
 
-objectStorage.objects().put(containerName, fileName, payload);
-```
+   objectStorage.objects().put(containerName, fileName, payload);
+   ```
 
 With this endpoint, you can do a POST request to `https://serverUrl/objectStorage?container=containerName&file=fileName` with the file contents as the body, to be uploaded to Object Storage. At this point, if you go to your Object Storage instance in Bluemix, you can see the file inside the specified container. Note that if the specified container does not exist, that container is first created, and then the file is uploaded inside it, without having to call any other methods.
 
@@ -211,7 +209,7 @@ To delete a file, the `doDelete` method gives the `ObjectStorageService` the con
 ```
 ActionResponse deleteResponse = objectStorage.objects().delete(containerName,fileName);
 
-if(!deleteResponse.isSuccess()){
+if (!deleteResponse.isSuccess()) {
 	response.sendError(deleteResponse.getCode());
 	System.out.println("Delete failed: " + deleteResponse.getFault());
 	return;
